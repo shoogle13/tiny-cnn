@@ -74,9 +74,10 @@ void parse_mnist_header(std::ifstream& ifs, mnist_header& header) {
 
     if (is_little_endian()) {
         reverse_endian(&header.magic_number);
-        reverse_endian(&header.num_items);
+        reverse_endian(&header.num_dims);
         reverse_endian(&header.num_rows);
         reverse_endian(&header.num_cols);
+        reverse_endian(&header.num_channels);
     }
 
     if (header.magic_number != 0x00000803 || header.num_items <= 0)
