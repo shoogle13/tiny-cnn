@@ -28,6 +28,7 @@
 #include "util.h"
 #include <fstream>
 #include <cstdint>
+#define NUM_CHANNELS 3
 
 namespace tiny_cnn {
 
@@ -59,25 +60,19 @@ void parse_mnist_labels(const std::string& label_file, std::vector<label_t> *lab
 
 struct mnist_header {
     uint32_t magic_number;
-    uint32_t num_dims;
     uint32_t num_rows;
     uint32_t num_cols;
-    uint32_t num_channels;
 };
 
 void parse_mnist_header(std::ifstream& ifs, mnist_header& header) {
     ifs.read((char*) &header.magic_number, 4);
-    ifs.read((char*) &header.num_dims, 4);
     ifs.read((char*) &header.num_rows, 4);
     ifs.read((char*) &header.num_cols, 4);
-    ifs.read((char*) &header.num_channels, 4);
 
     if (is_little_endian()) {
         reverse_endian(&header.magic_number);
-        reverse_endian(&header.num_dims);
         reverse_endian(&header.num_rows);
         reverse_endian(&header.num_cols);
-        reverse_endian(&header.num_channels);
     }
 
     if (header.magic_number != 0x00000803 || header.num_items <= 0)
@@ -93,19 +88,18 @@ void parse_mnist_image(std::ifstream& ifs,
     int x_padding,
     int y_padding,
     vec_t& dst) {
-    const int channels = header.num_channels;
     const int width = header.num_cols + 2 * x_padding;
-    const int height = channels * header.num_rows + 2 * y_padding;
+    const int height = NUM_CHANNELS * header.num_rows + 2 * y_padding;
 
-    std::vector<uint8_t> image_vec(header.num_rows * header.num_cols);
+    std::vector<uint8_t> image_vec(NUM_CHANNELS * header.num_rows * header.num_cols);
 
-    ifs.read((char*) &image_vec[0], header.num_rows * header.num_cols);
+    ifs.read((char*) &image_vec[0], NUM_CHANNELS * header.num_rows * header.num_cols);
 
-    dst.resize(width * height, scale_min);
+    dst.resize(NUM_CHANNELS * width * height, scale_min);
     
     for (size_t y = 0; y < header.num_rows; y++)
     for (size_t x = 0; x < header.num_cols; x++)
-    for (size_t c = 0; c < channels; c++)
+    for (size_t c = 0; c < NUM_CHANNELS; c++)
         dst[width * height * c +  width * (y + y_padding) + x + x_padding]
                 = (image_vec[y * header.num_cols + x] / 255.0) 
                     * (scale_max - scale_min) + scale_min;
