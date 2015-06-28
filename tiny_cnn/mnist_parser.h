@@ -60,17 +60,20 @@ void parse_mnist_labels(const std::string& label_file, std::vector<label_t> *lab
 
 struct mnist_header {
     uint32_t magic_number;
+    uint32_t num_items;
     uint32_t num_rows;
     uint32_t num_cols;
 };
 
 void parse_mnist_header(std::ifstream& ifs, mnist_header& header) {
     ifs.read((char*) &header.magic_number, 4);
+    ifs.read((char*) &header.num_items, 4);
     ifs.read((char*) &header.num_rows, 4);
     ifs.read((char*) &header.num_cols, 4);
 
     if (is_little_endian()) {
         reverse_endian(&header.magic_number);
+        reverse_endian(&header.num_items);
         reverse_endian(&header.num_rows);
         reverse_endian(&header.num_cols);
     }
