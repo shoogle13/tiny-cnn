@@ -89,7 +89,7 @@ void parse_mnist_image(std::ifstream& ifs,
     int y_padding,
     vec_t& dst) {
     const int width = header.num_cols + 2 * x_padding;
-    const int height = NUM_CHANNELS * header.num_rows + 2 * y_padding;
+    const int height = header.num_rows + 2 * y_padding;
 
     std::vector<uint8_t> image_vec(NUM_CHANNELS * header.num_rows * header.num_cols);
 
